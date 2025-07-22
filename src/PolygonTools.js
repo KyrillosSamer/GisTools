@@ -14,7 +14,7 @@ import { BsIntersect} from "react-icons/bs";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 import { LuMousePointer } from "react-icons/lu";
 import { FaPlusMinus } from "react-icons/fa6";
-import { FaEarthAfrica } from "react-icons/fa6";
+import shp from "shpjs";
 
 
 // blue icon
@@ -260,27 +260,53 @@ const PolygonTools = () => {
             .catch(error => console.error('Error exporting overlapping shapefile:', error));
     };
 
-    const handleUpload = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const data = e.target.result;
-                shapefile.open(data).then(source => {
-                    source.read().then(function processFeature(result) {
-                        if (result.done) return;
-                        const feature = result.value;
-                        const geoLayer = L.geoJSON(feature).eachLayer(layer => {
-                            drawnItemsRef.current.addLayer(layer);
-                        });
-                        setUploadedData(prev => [...prev, feature]);
-                        source.read().then(processFeature);
+
+const handleUpload = (event) => {
+    const file = event.target.files[0];
+    if (file && file.name.endsWith('.zip')) {
+        const reader = new FileReader();
+        reader.onload = async function (e) {
+            try {
+                const result = await shp(e.target.result);
+
+                // إذا كانت طبقة واحدة فقط
+                if (result && result.type === "FeatureCollection") {
+                    L.geoJSON(result).eachLayer(layer => {
+                        drawnItemsRef.current.addLayer(layer);
                     });
-                }).catch(error => console.error('خطأ في قراءة ملف الشكل:', error));
-            };
-            reader.readAsArrayBuffer(file);
-        }
-    };
+                    setUploadedData(prev => [...prev, ...result.features]);
+                }
+
+                // إذا كانت هناك طبقات متعددة
+                else if (typeof result === 'object' && !Array.isArray(result)) {
+                    const allFeatures = [];
+
+                    for (const layerName in result) {
+                        const layerData = result[layerName];
+                        if (layerData.type === "FeatureCollection") {
+                            L.geoJSON(layerData).eachLayer(layer => {
+                                drawnItemsRef.current.addLayer(layer);
+                            });
+                            allFeatures.push(...layerData.features);
+                        }
+                    }
+
+                    setUploadedData(prev => [...prev, ...allFeatures]);
+                } else {
+                    alert("لم يتم التعرف على محتوى الملف.");
+                }
+            } catch (error) {
+                console.error('📛 خطأ في قراءة ملف ZIP:', error);
+                alert('❌ تعذر قراءة الملف. تأكد أنه ملف ZIP يحتوي على ملفات Shapefile كاملة.');
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    } else {
+        alert("يرجى رفع ملف ZIP يحتوي على ملفات Shapefile (.shp, .shx, .dbf)");
+    }
+};
+
+
 
     const enableShapeSelection = () => {
         if (map) {
