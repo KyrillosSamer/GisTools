@@ -14,8 +14,7 @@ import { BsIntersect} from "react-icons/bs";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 import { LuMousePointer } from "react-icons/lu";
 import { FaPlusMinus } from "react-icons/fa6";
-// import myLogo from './sdi_logo.png';
-
+import { FaEarthAfrica } from "react-icons/fa6";
 
 
 // blue icon
@@ -34,8 +33,7 @@ const overlappingIcon = L.icon({
     popupAnchor: [1, -34],
 });
 
-// All variables
-    const PolygonTools = () => {
+const PolygonTools = () => {
     const mapRef = useRef(null);
     const drawnItemsRef = useRef(new L.FeatureGroup());
     const [map, setMap] = useState(null);
@@ -44,12 +42,9 @@ const overlappingIcon = L.icon({
     const [selectedLayers, setSelectedLayers] = useState([]);
     const [overlappingShapes, setOverlappingShapes] = useState([]);
     const [showPopup, setShowPopup] = useState(false);
- 
-    
     const [wfsData, setWfsData] = useState([]);
     const [wfsUrl, setWfsUrl] = useState('');
     const [wfsLayerName, setWfsLayerName] = useState('');
-
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     useEffect(() => {
@@ -71,6 +66,7 @@ const overlappingIcon = L.icon({
         initialMap.addLayer(drawnItemsRef.current);
 
         const drawControl = new L.Control.Draw({
+             position: 'topright', 
             draw: {
                 polygon: true,
                 polyline: true,
@@ -104,12 +100,10 @@ const overlappingIcon = L.icon({
         }).addTo(map);
     
         map.addLayer(wmsLayer);
-      };
-    
+    };
 
-
-      // -- Wfs Layer
-      const addWFSLayer = (url, layerName) => {
+    // -- Wfs Layer
+    const addWFSLayer = (url, layerName) => {
         $.getJSON(url, function (data) {
           const geoLayer = L.geoJSON(data, {
             onEachFeature: function (feature, layer) {
@@ -127,28 +121,16 @@ const overlappingIcon = L.icon({
             console.log('WFS Data:', updatedData);
             return updatedData;
           });
-          logAllData(); // Call function to gather all data automatically
+          logAllData();
         }).fail(function (jqXHR, textStatus, errorThrown) {
           console.error('فشل في تحميل بيانات WFS:', textStatus, errorThrown);
           alert('فشل في تحميل بيانات WFS');
         });
-      };
-    
-      const handleAddWFS = (event) => {
-        event.preventDefault();
-        if (wfsUrl && wfsLayerName) {
-          addWFSLayer(wfsUrl, wfsLayerName);
-          setWfsUrl('');
-          setWfsLayerName('');
-        }
-      };
-    
-      
+    };
 
     const handleDrawCreated = (event) => {
         const layer = event.layer;
 
-        // marker for data is point
         if (layer instanceof L.Marker) {
             const markerLayer = L.marker(layer.getLatLng(), { icon: customIcon });
             drawnItemsRef.current.addLayer(markerLayer);
@@ -159,7 +141,6 @@ const overlappingIcon = L.icon({
         const geoJSON = layer.toGeoJSON();
         setShapesData(prev => [...prev, geoJSON]);
 
-        // for circle display data
         if (layer instanceof L.Circle) {
             const radius = layer.getRadius().toFixed(2); 
             layer.bindPopup(`نصف القطر: ${radius} متر`).openPopup();
@@ -183,7 +164,7 @@ const overlappingIcon = L.icon({
                     const lineLength = length(layer.toGeoJSON().geometry).toFixed(2);
                     layer.bindPopup(`طول الخط: ${lineLength} متر`).openPopup();
                 } else if (layer instanceof L.Circle) {
-                    const radius = layer.getRadius().toFixed(2); // نصف القطر بالمتر
+                    const radius = layer.getRadius().toFixed(2);
                     layer.bindPopup(`نصف القطر: ${radius} متر`).openPopup();
                 } else if (layer instanceof L.Marker) {
                     const coords = layer.getLatLng();
@@ -226,7 +207,6 @@ const overlappingIcon = L.icon({
             });
         });
 
-        // change icon from blue to Red
         drawnItemsRef.current.eachLayer(layer => {
             if (layer instanceof L.Marker) {
                 const markerGeoJSON = layer.toGeoJSON();
@@ -243,8 +223,6 @@ const overlappingIcon = L.icon({
             alert('لم يتم العثور على أشكال متداخلة.');
         }
     };
-
-   
 
     const exportShapefile = () => {
         const allFeatures = [...shapesData, ...uploadedData].map((feature, index) => ({
@@ -346,91 +324,284 @@ const overlappingIcon = L.icon({
         console.log('WFS Data:', wfsData);
     };
     
-
     return (
-        <div style={{ display: 'absolute' }}>
-            <div id="map" ref={mapRef} style={{ height: '91vh', flexGrow: 1 }} />
+<div className="polygon-tools-container">
+        {/* Title  */}
 
-            {/* <div>
-            
-                <img src={myLogo} className='logoL' />
-            </div> */}
+        <h1 style={{
+            position: 'absolute',
+            top: '-15px',
+            left: '50%',
+            transform: 'translateX(-50%)',  
+            color: '#343a40',
+            fontSize: '24px',
+            fontWeight: 'bold',
+            zIndex: 1000,
+            width: '100%',
+            textAlign: 'center',
+            backgroundColor: '#f8f9fa',
+            height: '50px',
+            paddingTop: '20px',
+            }}>
 
-            
-            <div className='buttonss' >
+            SpatialAnalysis
+        </h1>
+        
+            {/* Simple Sidebar */}
+ <div className="sidebar">
 
-                <button onClick={enableShapeSelection}>
-                <LuMousePointer />
-                 Select</button>
-                <button onClick={checkOverlapAndMark}><BsIntersect className="icon1" />Intersect</button>
+                <h3 style={{ 
+                    margin: '0 0 20px 0', 
+                    fontSize: '16px', 
+                    color: '#495057',
+                    borderBottom: '2px solid #007bff',
+                    paddingBottom: '8px',
+                    zIndex: 2000,
+                }}>
+                    Map Tools
+                </h3>
 
-                <button onClick={togglePopup}>
-                <IoMdInformationCircleOutline className="icon2" />
-                    {showPopup ? 'Masking ' : 'View info'}
+                <button 
+                    onClick={enableShapeSelection}
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '10px',
+                        border: '1px solid #007bff',
+                        borderRadius: '4px',
+                        backgroundColor: '#fff',
+                        color: '#007bff',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        transition: 'all 0.2s',
+                        width: '85%'
+                    }}
+                    onMouseOver={(e) => {
+                        e.target.style.backgroundColor = '#007bff';
+                        e.target.style.color = '#fff';
+                    }}
+                    onMouseOut={(e) => {
+                        e.target.style.backgroundColor = '#fff';
+                        e.target.style.color = '#007bff';
+                    }}
+                >
+                    <LuMousePointer />
+                    Select Shape
                 </button>
 
-                
-                
-                
-                <input
-                    type="file"
-                    id="upload"
-                    className='upload'
-                    accept=".zip,.shp,.dbf"
-                    onChange={handleUpload}
-                     
-                />
-
-        {/* WMS Button */}
-        <button
-        
-        
-          onClick={() => {
-            const url = prompt("أدخل رابط WMS:");
-            const layerName = prompt("أدخل اسم طبقة WMS:");
-            if (url && layerName) {
-              addWMSLayer(url, layerName);
-            }
-          }}
-        >
-          <FaPlusMinus />
-          Add WMS
-        </button>
-
-    <button
-        
-        onClick={() => {
-        const wfsUrl = prompt("أدخل رابط WFS:");
-        const wfsLayerName = prompt("أدخل اسم طبقة WFS:");
-        if (wfsUrl && wfsLayerName) {
-            addWFSLayer(wfsUrl, wfsLayerName);
-        }
-        }}
-    >
-        <FaPlusMinus />
-        Add WFS
-  </button>
-
-            
-            <button
-                
-                onClick={() => setIsDropdownOpen(prev => !prev)}
+                <button 
+                    onClick={checkOverlapAndMark}
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '10px',
+                        border: '1px solid #28a745',
+                        borderRadius: '4px',
+                        backgroundColor: '#fff',
+                        color: '#28a745',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        transition: 'all 0.2s',
+                        width: '85%'
+                    }}
+                    onMouseOver={(e) => {
+                        e.target.style.backgroundColor = '#28a745';
+                        e.target.style.color = '#fff';
+                    }}
+                    onMouseOut={(e) => {
+                        e.target.style.backgroundColor = '#fff';
+                        e.target.style.color = '#28a745';
+                    }}
                 >
-                <FaDownload className="icon3" />
-                <span className="content">Download</span>
-            </button>
-                <ul style={{ display: isDropdownOpen ? 'block' : 'none' }}>
-                <li>
-             <button className='tnzel' onClick={exportShapefile}>Download all</button>
-                </li>
-                <li>
-            <button className='tnzel' onClick={exportOverlappingShapefile}>Download Intersected</button>
-                </li>
-                </ul>
+                    <BsIntersect />
+                    Find Intersects
+                </button>
+
+                <button 
+                    onClick={togglePopup}
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '10px',
+                        border: '1px solid #17a2b8',
+                        borderRadius: '4px',
+                        backgroundColor: '#fff',
+                        color: '#17a2b8',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        transition: 'all 0.2s',
+                        width: '85%'
+                    }}
+                    onMouseOver={(e) => {
+                        e.target.style.backgroundColor = '#17a2b8';
+                        e.target.style.color = '#fff';
+                    }}
+                    onMouseOut={(e) => {
+                        e.target.style.backgroundColor = '#fff';
+                        e.target.style.color = '#17a2b8';
+                    }}
+                >
+                    <IoMdInformationCircleOutline />
+                    {showPopup ? 'Hide Info' : 'Show Info'}
+                </button>
+
+                <div style={{
+                    borderTop: '1px solid #dee2e6',
+                    paddingTop: '15px',
+                    marginTop: '10px'
+                }}>
+                    <h4 style={{ 
+                        margin: '0 0 10px 0', 
+                        fontSize: '14px', 
+                        color: '#6c757d' 
+                    }}>
+                        File Upload
+                    </h4>
+                    <input
+                        type="file"
+                        accept=".zip,.shp,.dbf"
+                        onChange={handleUpload}
+                        style={{
+                            width: '90%',
+                            padding: '8px',
+                            border: '1px solid #ced4da',
+                            borderRadius: '4px',
+                            fontSize: '14px'
+                        }}
+                    />
+                </div>
+
+                <div style={{
+                    borderTop: '1px solid #dee2e6',
+                    paddingTop: '15px',
+                    marginTop: '10px'
+                }}>
+                    <h4 style={{ 
+                        margin: '0 0 10px 0', 
+                        fontSize: '14px', 
+                        color: '#6c757d' 
+                    }}>
+                        Add Layers
+                    </h4>
+                    
+                    <button
+                        onClick={() => {
+                            const url = prompt("أدخل رابط WMS:");
+                            const layerName = prompt("أدخل اسم طبقة WMS:");
+                            if (url && layerName) {
+                                addWMSLayer(url, layerName);
+                            }
+                        }}
+                        style={{
+                            width: '90%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            padding: '8px 10px',
+                            border: '1px solid #6c757d',
+                            borderRadius: '4px',
+                            backgroundColor: '#fff',
+                            color: '#6c757d',
+                            cursor: 'pointer',
+                            fontSize: '13px',
+                            marginBottom: '5px'
+                        }}
+                    >
+                        <FaPlusMinus />
+                        Add WMS Layer
+                    </button>
+
+                    <button
+                        onClick={() => {
+                            const wfsUrl = prompt("أدخل رابط WFS:");
+                            const wfsLayerName = prompt("أدخل اسم طبقة WFS:");
+                            if (wfsUrl && wfsLayerName) {
+                                addWFSLayer(wfsUrl, wfsLayerName);
+                            }
+                        }}
+                        style={{
+                            width: '90%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            padding: '8px 10px',
+                            border: '1px solid #6c757d',
+                            borderRadius: '4px',
+                            backgroundColor: '#fff',
+                            color: '#6c757d',
+                            cursor: 'pointer',
+                            fontSize: '13px'
+                        }}
+                    >
+                        <FaPlusMinus />
+                        Add WFS Layer
+                    </button>
+                </div>
+
+                <div style={{
+                    borderTop: '1px solid #dee2e6',
+                    paddingTop: '15px',
+                    marginTop: '10px'
+                }}>
+                    <h4 style={{ 
+                        margin: '0 0 10px 0', 
+                        fontSize: '14px', 
+                        color: '#6c757d' 
+                    }}>
+                        Download
+                    </h4>
+                    
+                    <button 
+                        onClick={exportShapefile}
+                        style={{
+                            width: '90%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            padding: '8px 10px',
+                            border: '1px solid #ffc107',
+                            borderRadius: '4px',
+                            backgroundColor: '#fff',
+                            color: '#ffc107',
+                            cursor: 'pointer',
+                            fontSize: '13px',
+                            marginBottom: '5px'
+                        }}
+                    >
+                        <FaDownload />
+                        Download All
+                    </button>
+
+                    <button 
+                        onClick={exportOverlappingShapefile}
+                        style={{
+                            width: '90%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            padding: '8px 10px',
+                            border: '1px solid #dc3545',
+                            borderRadius: '4px',
+                            backgroundColor: '#fff',
+                            color: '#dc3545',
+                            cursor: 'pointer',
+                            fontSize: '13px'
+                        }}
+                    >
+                        <FaDownload />
+                        Download Intersected
+                    </button>
+                </div>
             </div>
 
-                
+            {/* Map Container */}
+<div className="map-container">
+                <div id="map" ref={mapRef} style={{ height: '100%', width: '100%' }} />
             </div>
+        </div>
     );
 };
 

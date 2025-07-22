@@ -1,44 +1,51 @@
+/* Main Button Styles */
 button {
     width: 146px;
     height: 43px;
     border-radius: 9px;
     background-color: #000000;
     color: white;
-    font-size: 25px;
-    border: 2px solid rgb(0 220 255);
+    font-size: 16px; /* Removed duplicate font-size declarations */
+    font-weight: 600;
+    border: 2px solid rgb(0, 220, 255);
     margin-top: 17px;
+    margin-left: 8px;
     position: relative;
     right: -1px;
     top: -7px;
-    font-weight: 600;
-    font-size: larger;
-    margin-left: 8px;
     transition: background-color 1.5s ease, border 0.3s ease, color 0.3s ease;
 }
 
 button:hover {
-    background-color: rgb(0 220 255);
+    background-color: rgb(0, 220, 255);
     border: 2px solid white;
     color: black;
-
 }
-.leaflet-left .leaflet-control {
-    margin-left: 4%;
-    margin-top: 2px;
-    padding-top: 4px;
-    background-color: rgb(9, 29, 121);
-    box-Shadow: 15px 15px 10px rgba(0, 77, 243, 0.3)
 
+button:hover svg {
+    color: black;
 }
-#map{
-    height: 91vh;
+
+.leaflet-top.leaflet-right .leaflet-control {
+    margin-top: 100px;
+    margin-right: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 77, 243, 0.3);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+
+/* Map Container */
+#map {
+    height: 78vh;
     flex-grow: 1;
     position: relative;
-    outline-style: none;
-    padding: 0px;
+    outline: none;
+    padding: 0;
     margin: -8px;
 }
 
+/* Control Buttons Container */
 #controlButtons {
     display: inline-block;
     flex-direction: row;
@@ -52,13 +59,9 @@ button:hover {
     border-radius: 14px;
     max-height: 62px;
     max-width: 963px;
-    
 }
 
-
-
-
-
+/* Dropdown Styles */
 .dropdown-list {
     position: absolute;
     background-color: black;
@@ -77,78 +80,24 @@ ul {
     list-style-type: none;
     background-color: #000000;
     padding-left: 13px;
-    width: 83px;
     padding-right: 48px;
+    width: 83px;
     border-radius: 20%;
     border: #00ff00 solid 2px;
 }
 
-
-.tnzel{
-    width: 102px;
-}
-
-svg {
-    color: #00ff00;
-    margin-right: 5px;
-}
-
-button:hover svg{
-    color:black;
-}
-
-
-h1.title:hover {
-    color: #e9c698;
-}
-
-
-input#upload {
-    position: absolute;
-    top: -3px;
-    right: 202%;
-}
-.title{
-    position: relative;
-    top: 0
-    ;
-    z-index: 1200;
-}
-
-.buttonss {
-    position: absolute;
-    top: 4px;
-    right: 1%;
-}
-
-input#upload{
-
-        width: 178px;
-        height: 22px;
-        border-radius: 11px;
-        background-color: black;
-        font-size: 13px;
-        border: 2px solid rgb(0, 220, 255);
-        margin-top: 13px;
-        padding-top: 10px;
-        padding-bottom: 10px;
-        color: white;
-        position: absolute;
-        top: -5px;
-        right: 100%;
-    
-}
-li{
+li {
     background-color: black;
     z-index: 20000;
     border: 2px solid black;
     position: relative;
-    top: 0px;
-    right: 0px;
+    top: 0;
+    right: 0;
     width: 135px;
     border-radius: 25%;
 }
 
+/* Special Elements */
 .tnzel {
     width: 130px;
     font-size: 14px;
@@ -161,145 +110,110 @@ li{
 
 
 
-
-
-
-
-@media screen and (min-width: 0px) and (max-width: 600px) {
-
-    button {
-        position: relative;
-        top: -12%;
-        right: 2px;
-        width: 65px;
-        height: 45px;
-        border-radius: 9px;
-        background-color: #000000;
-        color: white;
-        font-size: 25px;
-        border: 2px solid rgb(0 220 255);
-        margin-top: 17px;
-        font-weight: 600;
-        font-size: larger;
-        margin-left: 8px;
-        font-size: 11px;
-        display: grid;
-        z-index: 1000;
-        
-    }h1.title{
-        position: relative;
-        top: 0;
-        z-index: 1200;
-        right: 0;
-        font-size: 25px;
-    }.buttonss {
-        background-color: #0202127d;
-        border: 2px solid #b8bbbb;
-        position: absolute;
-        top: 65px;
-        right: 0px;
-        z-index: 1000;
-    }
-        
-    }
-    @media screen and (min-width: 0px) and (max-width: 600px) {
-        input#upload {
-            position: absolute;
-            top: -71px;
-            right: 0px;
-            width: 118%;
-        }
-    }
-
-/* 600:768 */
-@media screen and (min-width: 600px) and (max-width: 768px) {
-    button {
-        position: relative;
-        top: -12%;
-        right: 2px;
-        width: 65px;
-        height: 45px;
-        border-radius: 9px;
-        background-color: #000000;
-        color: white;
-        font-size: 25px;
-        border: 2px solid rgb(0 220 255);
-        margin-top: 17px;
-        font-weight: 600;
-        font-size: larger;
-        margin-left: 8px;
-        font-size: 11px;
-        display: grid;
-        z-index: 1000;
-        
-    }h1.title{
-        position: relative;
-        top: 0;
-        z-index: 1200;
-        right: 0;
-        font-size: 25px;
-    }.buttonss {
-        background-color: #0202127d;
-        border: 2px solid #b8bbbb;
-        position: absolute;
-        top: 65px;
-        right: 0px;
-        z-index: 1000;
-    }
-        
-        input#upload {
-            position: absolute;
-            top: -71px;
-            right: 0px;
-            width: 249%;
-        }
+/* File Upload Input */
+input#upload {
+    width: 178px;
+    height: 22px;
+    border-radius: 11px;
+    background-color: black;
+    font-size: 13px;
+    border: 2px solid rgb(0, 220, 255);
+    margin-top: 13px;
+    padding: 10px 0; /* Simplified padding */
+    color: white;
+    position: absolute;
+    top: -5px;
+    right: 100%;
 }
 
+/* polygonTools.css */
 
-/*------------------------------ 768 : 992 -----------------------------*/
-
-
-@media screen and (min-width: 768px) and (max-width: 992px) {
-    button {
-        width: 84px;
-        height: 42px;
-        border-radius: 9px;
-        background-color: #000000;
-        color: white;
-        font-size: 25px;
-        border: 2px solid rgb(0 220 255);
-        margin-top: 17px;
-        position: relative;
-        right: 3px;
-        top: -7px;
-        font-size: 16px;
-        margin-left: 8px;
-    }h1.title{
-        visibility: hidden;
-    }
+.polygon-tools-container {
+    display: flex;
+    height: 98vh;
+    flex-direction: row;
 }
 
-
-@media screen and (min-width: 993px) and (max-width: 1150px) {
-    button {
-        width: 145px;
-        height: 42px;
-        border-radius: 9px;
-        background-color: #000000;
-        color: white;
-        font-size: 25px;
-        border: 2px solid rgb(0 220 255);
-        margin-top: 17px;
-        position: relative;
-        right: 3px;
-        top: -7px;
-        font-size: 16px;
-        margin-left: 8px;
-    }h1.title{
-        visibility: hidden;
-    }
-}
- 
-
-
+.sidebar {
+    width: 205px;
+    background-color: #f8f9fa;
+    border-right: 1px solid #dee2e6;
+    padding: 20px 15px;
+    display: flex
+;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    transition: all 0.3s ease;
+    height: 80%;
+    position: relative;
+    top: 6%;
+    overflow-x: hidden;
     
+}
+
+.map-container {
+    flex: 1;
+    position: relative;
+}
+
+.leaflet-top .leaflet-control {
+    margin-top: 77px;
+}
+
+@media (max-width: 768px) {
+    h1 {
+        display: none;
+    }
+
+    .polygon-tools-container {
+        display: flex;
+        flex-direction: column;
+        padding: 10px;
+        gap: 10px;
+        overflow-x: hidden;
+    }
+
+.sidebar {
+        position: relative;
+        top: 0;
+        width: 100%;
+        height: 28%;
+        display: flex;
+        flex-direction: column;
+        gap: 0px;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 1px solid #071f38;
+        background-color: #ffffff;
+        box-sizing: border-box;
+        overflow-x: hidden;
+        margin-bottom: 0px;
+    }
+
+    .sidebar h3,
+    .sidebar h4 {
+        font-size: 14px;
+        margin: 5px 0;
+        text-align: center;
+    }
+
+    /* كل مجموعة أزرار */
+    .button-pair {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: space-between;
+    }
+
+    .button-pair > button,
+    .button-pair > input {
+        flex: 1 1 48%;
+        box-sizing: border-box;
+    }
+
+    .sidebar input[type="file"] {
+        width: 100%;
+    }
+}
+
