@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "/GisTools/static/css/main.66d25870.css",
-    "main.js": "/GisTools/static/js/main.e4066e6a.js",
-    "static/js/453.280ccbb5.chunk.js": "/GisTools/static/js/453.280ccbb5.chunk.js",
-    "static/media/spritesheet.svg": "/GisTools/static/media/spritesheet.a4e0eb7ad904a4858361.svg",
-    "index.html": "/GisTools/index.html",
-    "main.66d25870.css.map": "/GisTools/static/css/main.66d25870.css.map",
-    "main.e4066e6a.js.map": "/GisTools/static/js/main.e4066e6a.js.map",
-    "453.280ccbb5.chunk.js.map": "/GisTools/static/js/453.280ccbb5.chunk.js.map"
+    "main.css": "/spatialanalysis/static/css/main.db7b1285.css",
+    "main.js": "/spatialanalysis/static/js/main.75e0774e.js",
+    "static/js/453.280ccbb5.chunk.js": "/spatialanalysis/static/js/453.280ccbb5.chunk.js",
+    "static/media/spritesheet.svg": "/spatialanalysis/static/media/spritesheet.a4e0eb7ad904a4858361.svg",
+    "index.html": "/spatialanalysis/index.html",
+    "main.db7b1285.css.map": "/spatialanalysis/static/css/main.db7b1285.css.map",
+    "main.75e0774e.js.map": "/spatialanalysis/static/js/main.75e0774e.js.map",
+    "453.280ccbb5.chunk.js.map": "/spatialanalysis/static/js/453.280ccbb5.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.66d25870.css",
-    "static/js/main.e4066e6a.js"
+    "static/css/main.db7b1285.css",
+    "static/js/main.75e0774e.js"
   ]
 }
