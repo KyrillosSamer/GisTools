@@ -316,7 +316,6 @@ const PolygonTools = () => {
             .catch(error => console.error('Error exporting overlapping shapefile:', error));
     };
 
-
 const handleUpload = (event) => {
     const file = event.target.files[0];
     if (file && file.name.endsWith('.zip')) {
@@ -327,16 +326,16 @@ const handleUpload = (event) => {
 
                 let allBounds = [];
 
-                // If it's a single layer
-                if (result && result.type === "FeatureCollection") {
-                    const layer = L.geoJSON(result).eachLayer(layer => {
-                        drawnItemsRef.current.addLayer(layer);
-                        allBounds.push(layer.getBounds());
-                    });
-                    setUploadedData(prev => [...prev, ...result.features]);
-                }
+                // Handle a single-layer shapefile
+               if (result && result.type === "FeatureCollection") {
+    L.geoJSON(result).eachLayer(layer => {
+        drawnItemsRef.current.addLayer(layer);
+        allBounds.push(layer.getBounds());
+    });
+    setUploadedData(prev => [...prev, ...result.features]);
+}
 
-                // If there are multiple layers
+                // Handle multi-layer shapefile
                 else if (typeof result === 'object' && !Array.isArray(result)) {
                     const allFeatures = [];
 
@@ -353,26 +352,27 @@ const handleUpload = (event) => {
 
                     setUploadedData(prev => [...prev, ...allFeatures]);
                 } else {
-                    alert("Unrecognized file content.");
+                    alert("Unsupported file structure. Please upload a valid Shapefile inside a ZIP.");
                     return;
                 }
 
-                // ✅ Fit to bounds of all added layers
+                // Fit map view to all newly added layers
                 if (allBounds.length > 0) {
                     const combinedBounds = allBounds.reduce((acc, bounds) => acc.extend(bounds), allBounds[0]);
                     map.fitBounds(combinedBounds);
                 }
 
             } catch (error) {
-                console.error('❌ Error reading ZIP file:', error);
-                alert('Failed to read the file. Make sure it is a ZIP file containing complete Shapefile components.');
+                console.error('Error while reading the ZIP file:', error);
+                alert('Could not read the file. Please ensure it is a valid ZIP containing .shp, .shx, and .dbf files.');
             }
         };
         reader.readAsArrayBuffer(file);
     } else {
-        alert("Please upload a ZIP file containing Shapefile components (.shp, .shx, .dbf)");
+        alert("Only ZIP files containing Shapefiles (.shp, .shx, .dbf) are supported.");
     }
 };
+
 
 
 
