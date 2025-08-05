@@ -45,7 +45,6 @@ const PolygonTools = () => {
     const [overlappingShapes, setOverlappingShapes] = useState([]);
     const [showPopup, setShowPopup] = useState(false);
     const [wfsData, setWfsData] = useState([]);
-    const [currentLayer, setCurrentLayer] = useState("OpenStreetMap");
 
    
 
@@ -328,7 +327,7 @@ const handleUpload = (event) => {
 
                 let allBounds = [];
 
-                // إذا كانت طبقة واحدة فقط
+                // If it's a single layer
                 if (result && result.type === "FeatureCollection") {
                     const layer = L.geoJSON(result).eachLayer(layer => {
                         drawnItemsRef.current.addLayer(layer);
@@ -337,7 +336,7 @@ const handleUpload = (event) => {
                     setUploadedData(prev => [...prev, ...result.features]);
                 }
 
-                // إذا كانت هناك طبقات متعددة
+                // If there are multiple layers
                 else if (typeof result === 'object' && !Array.isArray(result)) {
                     const allFeatures = [];
 
@@ -354,7 +353,7 @@ const handleUpload = (event) => {
 
                     setUploadedData(prev => [...prev, ...allFeatures]);
                 } else {
-                    alert("لم يتم التعرف على محتوى الملف.");
+                    alert("Unrecognized file content.");
                     return;
                 }
 
@@ -365,16 +364,15 @@ const handleUpload = (event) => {
                 }
 
             } catch (error) {
-                console.error('📛 خطأ في قراءة ملف ZIP:', error);
-                alert('❌ تعذر قراءة الملف. تأكد أنه ملف ZIP يحتوي على ملفات Shapefile كاملة.');
+                console.error('❌ Error reading ZIP file:', error);
+                alert('Failed to read the file. Make sure it is a ZIP file containing complete Shapefile components.');
             }
         };
         reader.readAsArrayBuffer(file);
     } else {
-        alert("يرجى رفع ملف ZIP يحتوي على ملفات Shapefile (.shp, .shx, .dbf)");
+        alert("Please upload a ZIP file containing Shapefile components (.shp, .shx, .dbf)");
     }
 };
-
 
 
 
@@ -470,7 +468,7 @@ const handleUpload = (event) => {
             paddingBottom : '5px',
             }}>
 
-            SpatialAnalysis
+            Gis Tools
         </h1>
         
             {/* Simple Sidebar */}
