@@ -1,20 +1,48 @@
+html{
+    overflow-y: hidden;
+}
 /* Main Button Styles */
 button {
     width: 146px;
-    height: 43px;
+    height: 40px;
     border-radius: 9px;
     background-color: #000000;
     color: white;
-    font-size: 16px; /* Removed duplicate font-size declarations */
+    font-size: 16px; 
     font-weight: 600;
     border: 2px solid rgb(0, 220, 255);
     margin-top: 17px;
     margin-left: 8px;
     position: relative;
     right: -1px;
-    top: -7px;
+    top: -3px;
     transition: background-color 1.5s ease, border 0.3s ease, color 0.3s ease;
 }
+.custom-draw-cursor {
+    cursor: url('https://unpkg.com/leaflet@1.0.3/dist/images/marker-icon.png') 12 41, auto;
+}
+
+.leaflet-control-locate {
+  background-color: white;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  box-shadow: 0 0 5px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.leaflet-control-locate::before {
+  content: "";
+  display: block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #000;
+  border-radius: 50%;
+}
+
 
 button:hover {
     background-color: rgb(0, 220, 255);
@@ -74,7 +102,7 @@ button:hover svg {
 }
 
 ul {
-    position: absolute;
+    position: fixed;
     top: 54px;
     right: 8px;
     list-style-type: none;
@@ -82,20 +110,9 @@ ul {
     padding-left: 13px;
     padding-right: 48px;
     width: 83px;
-    border-radius: 20%;
-    border: #00ff00 solid 2px;
 }
 
-li {
-    background-color: black;
-    z-index: 20000;
-    border: 2px solid black;
-    position: relative;
-    top: 0;
-    right: 0;
-    width: 135px;
-    border-radius: 25%;
-}
+
 
 /* Special Elements */
 .tnzel {
@@ -107,6 +124,7 @@ li {
     z-index: 1000;
     margin: 5px;
 }
+
 
 
 
@@ -139,17 +157,15 @@ input#upload {
     background-color: #f8f9fa;
     border-right: 1px solid #dee2e6;
     padding: 20px 15px;
-    display: flex
-;
+    display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 0px;
     overflow-y: auto;
     transition: all 0.3s ease;
-    height: 80%;
+    height: 99%;
     position: relative;
-    top: 6%;
+    top: -3%;
     overflow-x: hidden;
-    
 }
 
 .map-container {

@@ -2,10 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet-draw';
 import $ from 'jquery';
-import { area, booleanIntersects, length } from '@turf/turf';
+import { area, booleanIntersects, length , booleanEqual  } from '@turf/turf';
 import { saveAs } from 'file-saver';
 import shpwrite from '@mapbox/shp-write';
-import * as shapefile from 'shapefile';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import './polygonTools.css';
@@ -13,8 +12,11 @@ import { FaDownload  } from "react-icons/fa";
 import { BsIntersect} from "react-icons/bs";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 import { LuMousePointer } from "react-icons/lu";
-import { FaPlusMinus } from "react-icons/fa6";
+import { FaLocationDot, FaPlusMinus } from "react-icons/fa6";
 import shp from "shpjs";
+
+// topp:states
+
 
 
 // blue icon
@@ -43,15 +45,15 @@ const PolygonTools = () => {
     const [overlappingShapes, setOverlappingShapes] = useState([]);
     const [showPopup, setShowPopup] = useState(false);
     const [wfsData, setWfsData] = useState([]);
-    const [wfsUrl, setWfsUrl] = useState('');
-    const [wfsLayerName, setWfsLayerName] = useState('');
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [currentLayer, setCurrentLayer] = useState("OpenStreetMap");
+
+   
 
     useEffect(() => {
         const initialMap = L.map(mapRef.current, {
             minZoom: 4,
             maxZoom: 18
-        }).setView([27.59063, 31.274659], 7);
+        }).setView([27.59063, 31.274659], 6);
         
         const baseMaps = {
             OpenStreetMap: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{y}/{x}.png', {
@@ -90,20 +92,64 @@ const PolygonTools = () => {
         };
     }, []);
 
-    //-- Wms Layer
-    const addWMSLayer = (url, layerName) => {
-        const wmsLayer = L.tileLayer.wms(url, {
-          layers: layerName,
-          format: 'image/png',
-          transparent: true,
-          attribution: "© OpenStreetMap contributors",
-        }).addTo(map);
     
-        map.addLayer(wmsLayer);
-    };
+
+    //-- Wms Layer
+  const addWMSLayer = async (url, layerName) => {
+  try {
+    const wmsLayer = L.tileLayer.wms(url, {
+      layers: layerName,
+      format: 'image/png',
+      transparent: true,
+      attribution: "WMS Layer",
+    }).addTo(map);
+
+    map.addLayer(wmsLayer);
+
+    const capabilitiesUrl = `${url}?service=WMS&request=GetCapabilities`;
+
+    const response = await fetch(capabilitiesUrl);
+    const text = await response.text();
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(text, "text/xml");
+
+    // ابدأ من داخل Capability > Layer فقط
+    const capabilityLayer = xml.querySelector("Capability > Layer");
+    const layerList = capabilityLayer.getElementsByTagName("Layer");
+
+    let bbox = null;
+
+    for (let i = 0; i < layerList.length; i++) {
+      const name = layerList[i].getElementsByTagName("Name")[0];
+      if (name && name.textContent === layerName) {
+        const bboxTag = layerList[i].getElementsByTagName("EX_GeographicBoundingBox")[0];
+        if (bboxTag) {
+          const west = parseFloat(bboxTag.getElementsByTagName("westBoundLongitude")[0].textContent);
+          const east = parseFloat(bboxTag.getElementsByTagName("eastBoundLongitude")[0].textContent);
+          const south = parseFloat(bboxTag.getElementsByTagName("southBoundLatitude")[0].textContent);
+          const north = parseFloat(bboxTag.getElementsByTagName("northBoundLatitude")[0].textContent);
+          bbox = L.latLngBounds([[south, west], [north, east]]);
+          break;
+        }
+      }
+    }
+
+    if (bbox) {
+      map.fitBounds(bbox);
+    } else {
+      alert("لم يتم العثور على حدود الطبقة.");
+    }
+
+  } catch (error) {
+    console.error("❌ خطأ في تحميل WMS:", error);
+    alert("حدث خطأ أثناء تحميل الطبقة.");
+  }
+};
+
+
 
     // -- Wfs Layer
-    const addWFSLayer = (url, layerName) => {
+    const addWFSLayer = (url) => {
         $.getJSON(url, function (data) {
           const geoLayer = L.geoJSON(data, {
             onEachFeature: function (feature, layer) {
@@ -174,55 +220,66 @@ const PolygonTools = () => {
         });
     };
 
-    const checkOverlapAndMark = () => {
-        const allGeoJSONFeatures = [...shapesData, ...uploadedData];
-        drawnItemsRef.current.eachLayer(layer => {
-            if (layer.setStyle) {
-                layer.setStyle({ color: 'blue' });
-            }
-        });
-
-        const overlappingIndices = new Set();
-        const overlappingShapesTemp = [];
-        allGeoJSONFeatures.forEach((geoA, indexA) => {
-            allGeoJSONFeatures.forEach((geoB, indexB) => {
-                if (indexA !== indexB && geoA.geometry && geoB.geometry) {
-                    if (booleanIntersects(geoA.geometry, geoB.geometry)) {
-                        overlappingIndices.add(indexA);
-                        overlappingIndices.add(indexB);
-                    }
-                }
-            });
-        });
-
-        overlappingIndices.forEach(index => {
-            const feature = allGeoJSONFeatures[index];
-            overlappingShapesTemp.push(feature);
-            drawnItemsRef.current.eachLayer(layer => {
-                if (layer.toGeoJSON().geometry && JSON.stringify(layer.toGeoJSON().geometry) === JSON.stringify(feature.geometry)) {
-                    if (layer.setStyle) {
-                        layer.setStyle({ color: 'red' });
-                    }
-                }
-            });
-        });
-
-        drawnItemsRef.current.eachLayer(layer => {
-            if (layer instanceof L.Marker) {
-                const markerGeoJSON = layer.toGeoJSON();
-                if (overlappingShapesTemp.some(overlapShape => booleanIntersects(markerGeoJSON.geometry, overlapShape.geometry))) {
-                    layer.setIcon(overlappingIcon);
-                } else {
-                    layer.setIcon(customIcon); 
-                }
-            }
-        });
-
-        setOverlappingShapes(overlappingShapesTemp);
-        if (overlappingIndices.size === 0) {
-            alert('لم يتم العثور على أشكال متداخلة.');
+   const checkOverlapAndMark = () => {
+    const allGeoJSONFeatures = [...shapesData, ...uploadedData];
+    
+    // Reset styles before marking
+    drawnItemsRef.current.eachLayer(layer => {
+        if (layer instanceof L.Marker) {
+            layer.setIcon(customIcon);
+        } else if (layer.setStyle) {
+            layer.setStyle({ color: 'blue' });
         }
-    };
+    });
+
+    const overlappingIndices = new Set();
+    const overlappingShapesTemp = [];
+
+    // Check for intersecting pairs
+    allGeoJSONFeatures.forEach((geoA, indexA) => {
+        allGeoJSONFeatures.forEach((geoB, indexB) => {
+            if (indexA !== indexB && geoA.geometry && geoB.geometry) {
+                if (booleanIntersects(geoA.geometry, geoB.geometry)) {
+                    overlappingIndices.add(indexA);
+                    overlappingIndices.add(indexB);
+                }
+            }
+        });
+    });
+
+    // Collect and highlight overlapping features
+    overlappingIndices.forEach(index => {
+        const overlappedFeature = allGeoJSONFeatures[index];
+        overlappingShapesTemp.push(overlappedFeature);
+
+        drawnItemsRef.current.eachLayer(layer => {
+            const layerGeo = layer.toGeoJSON();
+            if (booleanEqual(layerGeo.geometry, overlappedFeature.geometry)) {
+                if (layer.setStyle) {
+                    layer.setStyle({ color: 'red' });
+                }
+            }
+        });
+    });
+
+    // Special case: markers overlapping with other geometries
+    drawnItemsRef.current.eachLayer(layer => {
+        if (layer instanceof L.Marker) {
+            const markerGeo = layer.toGeoJSON();
+            const isOverlapping = overlappingShapesTemp.some(shape =>
+                booleanIntersects(markerGeo.geometry, shape.geometry)
+            );
+            layer.setIcon(isOverlapping ? overlappingIcon : customIcon);
+        }
+    });
+
+    setOverlappingShapes(overlappingShapesTemp);
+
+    if (overlappingIndices.size === 0) {
+        alert('لم يتم العثور على أشكال متداخلة.');
+    }
+};
+
 
     const exportShapefile = () => {
         const allFeatures = [...shapesData, ...uploadedData].map((feature, index) => ({
@@ -269,10 +326,13 @@ const handleUpload = (event) => {
             try {
                 const result = await shp(e.target.result);
 
+                let allBounds = [];
+
                 // إذا كانت طبقة واحدة فقط
                 if (result && result.type === "FeatureCollection") {
-                    L.geoJSON(result).eachLayer(layer => {
+                    const layer = L.geoJSON(result).eachLayer(layer => {
                         drawnItemsRef.current.addLayer(layer);
+                        allBounds.push(layer.getBounds());
                     });
                     setUploadedData(prev => [...prev, ...result.features]);
                 }
@@ -286,6 +346,7 @@ const handleUpload = (event) => {
                         if (layerData.type === "FeatureCollection") {
                             L.geoJSON(layerData).eachLayer(layer => {
                                 drawnItemsRef.current.addLayer(layer);
+                                allBounds.push(layer.getBounds());
                             });
                             allFeatures.push(...layerData.features);
                         }
@@ -294,7 +355,15 @@ const handleUpload = (event) => {
                     setUploadedData(prev => [...prev, ...allFeatures]);
                 } else {
                     alert("لم يتم التعرف على محتوى الملف.");
+                    return;
                 }
+
+                // ✅ Fit to bounds of all added layers
+                if (allBounds.length > 0) {
+                    const combinedBounds = allBounds.reduce((acc, bounds) => acc.extend(bounds), allBounds[0]);
+                    map.fitBounds(combinedBounds);
+                }
+
             } catch (error) {
                 console.error('📛 خطأ في قراءة ملف ZIP:', error);
                 alert('❌ تعذر قراءة الملف. تأكد أنه ملف ZIP يحتوي على ملفات Shapefile كاملة.');
@@ -305,6 +374,7 @@ const handleUpload = (event) => {
         alert("يرجى رفع ملف ZIP يحتوي على ملفات Shapefile (.shp, .shx, .dbf)");
     }
 };
+
 
 
 
@@ -349,6 +419,35 @@ const handleUpload = (event) => {
         console.log('Overlapping Shapes:', overlappingShapes);
         console.log('WFS Data:', wfsData);
     };
+
+   const getMyLocation = () => {
+    if (!map) {
+        alert("الخريطة لم تجهز بعد");
+        return;
+    }
+
+    map.locate({ setView: true, maxZoom: 22 });
+
+    map.once('locationfound', (e) => {
+        const radius = e.accuracy;
+
+        // فقط دائرة بدون ماركر
+        L.circle(e.latlng, {
+            radius: radius,
+            color: 'blue',
+            fillColor: '#30f',
+            fillOpacity: 0.3
+        }).addTo(map).bindPopup(`You're here (accuracy: ~${Math.round(radius)} meters)`).openPopup();
+    });
+
+    map.once('locationerror', (e) => {
+        alert("تعذر الحصول على موقعك: " + e.message);
+    });
+};
+
+
+
+    
     
     return (
 <div className="polygon-tools-container">
@@ -366,8 +465,9 @@ const handleUpload = (event) => {
             width: '100%',
             textAlign: 'center',
             backgroundColor: '#f8f9fa',
-            height: '50px',
-            paddingTop: '20px',
+            height: '30px',
+            paddingTop: '10px',
+            paddingBottom : '5px',
             }}>
 
             SpatialAnalysis
@@ -386,6 +486,39 @@ const handleUpload = (event) => {
                 }}>
                     Map Tools
                 </h3>
+
+<button 
+    onClick={getMyLocation}
+    style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        padding: '10px',
+        border: '1px solid #6c757d',
+        borderRadius: '4px',
+        backgroundColor: '#fff',
+        color: '#6c757d',
+        cursor: 'pointer',
+        fontSize: '14px',
+        transition: 'all 0.2s',
+        width: '85%',
+        marginBottom: '10px'
+    }}
+    onMouseOver={(e) => {
+        e.target.style.backgroundColor = '#6c757d';
+        e.target.style.color = '#fff';
+    }}
+    onMouseOut={(e) => {
+        e.target.style.backgroundColor = '#fff';
+        e.target.style.color = '#6c757d';
+    }}
+>
+    <FaLocationDot />
+
+   Locate me
+</button>
+
+
 
                 <button 
                     onClick={enableShapeSelection}
